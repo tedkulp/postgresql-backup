@@ -23,7 +23,6 @@ docker run -it --rm --name=pgbackup \
 
 ## Required environment variables
 
-* `CRON_SCHEDULE`: The time schedule part of a crontab file (e.g: `15 3 * * *` for every night 03:15)
 * `DB_HOST`: Postgres hostname
 * `DB_PASS`: Postgres password
 * `DB_USER`: Postgres username
@@ -35,6 +34,7 @@ docker run -it --rm --name=pgbackup \
 
 ## Optional environment variables
 
+* `CRON_SCHEDULE`: The time schedule part of a crontab file (e.g: `15 3 * * *` for every night 03:15). If not set, script will run one time and exit.
 * `S3_STORAGE_CLASS`: Specify [storage class](https://docs.aws.amazon.com/AmazonS3/latest/userguide/storage-class-intro.html) for the uploaded object, defaults to `STANDARD_IA`.
 * `S3_EXTRA_OPTIONS`: Specify additional options for S3, e.g. `--endpoint=` for using custom S3 provider.
 * `DB_USE_DUMPALL`: Dump all of the databases instead of the one in `DB_NAME`. `true` or `false`. (Only uses the `DB_NAME` for the name of the backup file -- defaults to `pg_dumpall`)
@@ -109,9 +109,8 @@ The following environment variables are required:
 ## Taking a one off backup
 
 To run a one off backup job, e.g. to test that it works when setting it up for the first time, simply start 
-the container with the docker run command set to `python -u /backup/backup.py` (as well as all the required environment 
-variables set).
-
+the container without the `CRON_SCHEDULE` environment variable but with all the other required environment
+variables set.
 
 ## Docker tags
 
