@@ -1,10 +1,10 @@
 # Docker PostgreSQL Backup
 
-[![Build Status](https://github.com/heyman/postgresql-backup/workflows/Test/badge.svg)](https://github.com/heyman/postgresql-backup/actions?query=workflow%3ATest)
+[![Build Status](https://github.com/tedkulp/postgresql-backup/workflows/Test/badge.svg)](https://github.com/tedkulp/postgresql-backup/actions?query=workflow%3ATest)
 
 Docker image that periodically dumps a Postgres database, and uploads it to an Amazon S3 bucket.
 
-Available on Docker Hub: [heyman/postgresql-backup](https://hub.docker.com/r/heyman/postgresql-backup)
+Available on Docker Hub: [tedkulp/postgresql-backup](https://hub.docker.com/r/tedkulp/postgresql-backup)
 
 ## Example
 
@@ -18,7 +18,7 @@ docker run -it --rm --name=pgbackup \
     -e S3_PATH='s3://my-bucket/backups/' \
     -e AWS_ACCESS_KEY_ID='[aws key id]' \
     -e AWS_SECRET_ACCESS_KEY='[aws secret key]' \
-    heyman/postgresql-backup:15
+    tedkulp/postgresql-backup:15
 ```
 
 ## Required environment variables
@@ -27,7 +27,7 @@ docker run -it --rm --name=pgbackup \
 * `DB_HOST`: Postgres hostname
 * `DB_PASS`: Postgres password
 * `DB_USER`: Postgres username
-* `DB_NAME`: Name of database
+* `DB_NAME`: Name of database (Not required if `DB_USE_DUMPALL` is enabled)
 * `S3_PATH`: Amazon S3 path in the format: s3://bucket-name/some/path
 * `AWS_ACCESS_KEY_ID`
 * `AWS_SECRET_ACCESS_KEY`
@@ -37,6 +37,7 @@ docker run -it --rm --name=pgbackup \
 
 * `S3_STORAGE_CLASS`: Specify [storage class](https://docs.aws.amazon.com/AmazonS3/latest/userguide/storage-class-intro.html) for the uploaded object, defaults to `STANDARD_IA`.
 * `S3_EXTRA_OPTIONS`: Specify additional options for S3, e.g. `--endpoint=` for using custom S3 provider.
+* `DB_USE_DUMPALL`: Dump all of the databases instead of the one in `DB_NAME`. `true` or `false`. (Only uses the `DB_NAME` for the name of the backup file -- defaults to `pg_dumpall`)
 * `DB_USE_ENV`: Inject [postgres environment variables](https://www.postgresql.org/docs/13/libpq-envars.html) from the environment. Ignores `DB_HOST`, `DB_PASS`, `DB_USER` and `DB_NAME`. Can be used to specify advanced connections, e.g. using mTLS connection.
     Example of `--env-file=.env` for container:
     ```

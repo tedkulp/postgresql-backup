@@ -15,9 +15,14 @@ S3_EXTRA_OPTIONS = os.environ.get("S3_EXTRA_OPTIONS") or ""
 
 DB_USE_ENV = os.environ.get("DB_USE_ENV") or False
 DB_NAME = os.environ["DB_NAME"] if "DB_NAME" in os.environ else os.environ.get("PGDATABASE")
+DB_USE_DUMPALL = os.environ.get("DB_USE_DUMPALL") or False
+DB_EXCLUDE_PATTERN = os.environ.get("DB_EXCLUDE_PATTERN") or ""
 
-if not DB_NAME:
+if not DB_USE_DUMPALL and not DB_NAME:
     raise Exception("DB_NAME must be set")
+
+if DB_USE_DUMPALL and not DB_NAME:
+    DB_NAME = "pg_dumpall"
 
 if not DB_USE_ENV:
     DB_HOST = os.environ["DB_HOST"]
@@ -69,7 +74,13 @@ def take_backup():
         env.update({'PGPASSWORD': DB_PASS, 'PGHOST': DB_HOST, 'PGUSER': DB_USER, 'PGDATABASE': DB_NAME, 'PGPORT': DB_PORT})
 
     # trigger postgres-backup
-    cmd("pg_dump -Fc > %s" % backup_file, env=env)
+    if DB_USE_DUMPALL:
+        if len(DB_EXCLUDE_PATTERN) > 0:
+            cmd("pg_dumpall --exclude-pattern \"%s\" > %s" % backup_file, DB_EXCLUDE_PATTERN, env=env)
+        else:
+            cmd("pg_dumpall > %s" % backup_file, env=env)
+    else:
+        cmd("pg_dump -Fc > %s" % backup_file, env=env)
 
 def upload_backup():
     opts = "--storage-class=%s %s" % (S3_STORAGE_CLASS, S3_EXTRA_OPTIONS)

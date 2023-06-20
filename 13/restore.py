@@ -12,8 +12,9 @@ S3_EXTRA_OPTIONS = os.environ.get("S3_EXTRA_OPTIONS") or ""
 
 DB_USE_ENV = os.environ.get("DB_USE_ENV") or False
 DB_NAME = os.environ["DB_NAME"] if "DB_NAME" in os.environ else os.environ.get("PGDATABASE")
+DB_USE_DUMPALL = os.environ.get("DB_USE_DUMPALL") or False
 
-if not DB_NAME:
+if not DB_USE_DUMPALL and not DB_NAME:
     raise Exception("DB_NAME must be set")
 
 if not DB_USE_ENV:
@@ -56,7 +57,10 @@ def restore_backup():
     else:
         env.update({'PGPASSWORD': DB_PASS, 'PGHOST': DB_HOST, 'PGUSER': DB_USER, 'PGDATABASE': DB_NAME, 'PGPORT': DB_PORT})
 
-    cmd("pg_restore -Fc -d %s %s" % (DB_NAME, backup_file), env=env)
+    if DB_USE_DUMPALL:
+        cmd("pg_restore %s" % (backup_file), env=env)
+    else:
+        cmd("pg_restore -Fc -d %s %s" % (DB_NAME, backup_file), env=env)
 
 def download_backup():
     cmd("aws s3 cp %s %s%s %s" % (S3_EXTRA_OPTIONS, S3_PATH, file_name, backup_file))
